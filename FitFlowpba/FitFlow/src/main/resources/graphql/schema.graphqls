@@ -244,19 +244,22 @@ type RoutineActivity {
   id: ID!
   routine: Routine!
   habit: Habit!
-  scheduledTime: DateTime!
+  duration: Int!
+  notes: String
 }
 
 input RoutineActivityCreateInput {
   routineId: ID!
   habitId: ID!
-  scheduledTime: DateTime!
+   duration: Int!
+  notes: String
 }
 
 input RoutineActivityUpdateInput {
   routineId: ID
   habitId: ID
-  scheduledTime: DateTime
+   duration: Int!
+  notes: String
 }
 
 type RoutineActivityPage {
@@ -269,14 +272,19 @@ type RoutineActivityPage {
 
 type Routine {
   id: ID!
-  name: String!
+  title: String!
+  userId: ID!
+  daysOfWeek: [String!]
+  activityIds: [ID!]
   user: User!
   activities: [RoutineActivity!]!
 }
 
 input RoutineCreateInput {
-  name: String!
+  title: String!
   userId: ID!
+  daysOfWeek: [String!]
+  activityIds: [ID!]
 }
 
 input RoutineUpdateInput {

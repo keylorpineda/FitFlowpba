@@ -99,13 +99,19 @@ public RoutineOutputDTO create(RoutineInputDTO dto) {
 
         
         if (dto.getActivityIds() != null) {
-            List<RoutineActivity> acts = dto.getActivityIds().isEmpty()
-                    ? List.of()
-                    : routineActivityRepository.findAllById(dto.getActivityIds());
-           
-            acts.forEach(a -> a.setRoutine(current));
-            current.getActivities().clear();
-            current.getActivities().addAll(acts);
+           if (dto.getActivityIds().isEmpty()) {
+                current.getActivities().clear();
+            } else {
+                List<RoutineActivity> acts = routineActivityRepository.findAllById(dto.getActivityIds());
+
+                if (acts.size() != dto.getActivityIds().size()) {
+                    throw new IllegalArgumentException("Uno o más activityIds no existen.");
+                }
+
+                acts.forEach(a -> a.setRoutine(current));
+                current.getActivities().clear();
+                current.getActivities().addAll(acts);
+            }
         }
 
         Routine saved = routineRepository.save(current);
