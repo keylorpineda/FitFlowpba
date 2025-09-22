@@ -8,11 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import una.ac.cr.FitFlow.dto.AuthToken.AuthTokenInputDTO;
-import una.ac.cr.FitFlow.dto.AuthToken.AuthTokenOutputDTO;
-import una.ac.cr.FitFlow.dto.AuthToken.LoginTokenDTO;
 import una.ac.cr.FitFlow.dto.User.UserInputDTO;
 import una.ac.cr.FitFlow.dto.User.UserOutputDTO;
+import una.ac.cr.FitFlow.dto.User.LoginTokenDTO;
 import una.ac.cr.FitFlow.mapper.MapperForUser;
 import una.ac.cr.FitFlow.model.Habit;
 import una.ac.cr.FitFlow.model.Role;
@@ -21,8 +19,6 @@ import una.ac.cr.FitFlow.repository.HabitRepository;
 import una.ac.cr.FitFlow.repository.RoleRepository;
 import una.ac.cr.FitFlow.repository.UserRepository;
 import una.ac.cr.FitFlow.security.JwtService;
-import una.ac.cr.FitFlow.service.AuthToken.AuthTokenService;
-import una.ac.cr.FitFlow.dto.AuthToken.*;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -40,7 +36,6 @@ public class UserServiceImplementation implements UserService {
     private final RoleRepository roleRepository;
     private final HabitRepository habitRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthTokenService authTokenService;
     private final JwtService jwtService;
     private final MapperForUser mapper;
 
@@ -170,32 +165,31 @@ public class UserServiceImplementation implements UserService {
         return page.map(this::toDto);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public LoginTokenDTO loginByMail(String email, String password) {
+        String emailNorm = normEmail(email);
 
-@Override
-@Transactional(readOnly = true)
-public LoginTokenDTO loginByMail(String email, String password) {
-    String emailNorm = normEmail(email);
+        User user = userRepository.findByEmail(emailNorm)
+                .orElseThrow(() -> new IllegalArgumentException("Correo electrónico no encontrado."));
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("Clave incorrecta.");
+        }
 
-    User user = userRepository.findByEmail(emailNorm)
-            .orElseThrow(() -> new IllegalArgumentException("Correo electrónico no encontrado."));
-    if (!passwordEncoder.matches(password, user.getPassword())) {
-        throw new IllegalArgumentException("Clave incorrecta.");
+        // Roles para el claim (MODULE_PERMISSION)
+        java.util.Set<String> roles = (user.getRoles() == null) ? java.util.Set.of()
+                : user.getRoles().stream()
+                        .map(r -> r.getModule() + "_" + r.getPermission())
+                        .collect(Collectors.toSet());
+
+        String jwt = jwtService.generateToken(user.getEmail(), roles);
+        java.time.OffsetDateTime expiresAt = java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC)
+                .plusSeconds(jwtService.getValidityMillis() / 1000);
+
+        return LoginTokenDTO.builder()
+                .token(jwt)
+                .expiresAt(expiresAt)
+                .userId(user.getId())
+                .build();
     }
-
-    // Roles para el claim (MODULE_PERMISSION)
-    java.util.Set<String> roles = (user.getRoles() == null) ? java.util.Set.of()
-            : user.getRoles().stream()
-              .map(r -> r.getModule() + "_" + r.getPermission())
-              .collect(Collectors.toSet());
-
-    String jwt = jwtService.generateToken(user.getEmail(), roles);
-    java.time.OffsetDateTime expiresAt = java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC)
-            .plusSeconds(jwtService.getValidityMillis() / 1000);
-
-    return LoginTokenDTO.builder()
-            .token(jwt)
-            .expiresAt(expiresAt)
-            .userId(user.getId())
-            .build();
-}
 }

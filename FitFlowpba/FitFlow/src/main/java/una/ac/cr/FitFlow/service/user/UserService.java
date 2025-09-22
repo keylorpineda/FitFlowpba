@@ -2,8 +2,7 @@ package una.ac.cr.FitFlow.service.user;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import una.ac.cr.FitFlow.dto.AuthToken.AuthTokenOutputDTO;
-import una.ac.cr.FitFlow.dto.AuthToken.LoginTokenDTO;
+import una.ac.cr.FitFlow.dto.User.LoginTokenDTO;
 import una.ac.cr.FitFlow.dto.User.UserOutputDTO;
 import una.ac.cr.FitFlow.dto.User.UserInputDTO;
 

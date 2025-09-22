@@ -22,7 +22,7 @@ Los tokens deben incluir el claim `roles` con los permisos otorgados en formato 
 
 ### Mapeo de módulos
 
-- `RUTINAS`: rutinas, usuarios, roles y administración de tokens (`AuthToken`).
+- `RUTINAS`: rutinas, usuarios y roles.
 - `ACTIVIDADES`: hábitos y actividades de rutina.
 - `GUIAS`: guías de bienestar.
 - `PROGRESO`: registros de progreso y actividades completadas.
