@@ -33,7 +33,6 @@ import una.ac.cr.FitFlow.dto.Guide.GuideOutputDTO;
 import una.ac.cr.FitFlow.model.Role;
 import una.ac.cr.FitFlow.security.JwtService;
 import una.ac.cr.FitFlow.security.SecurityUtils;
-import una.ac.cr.FitFlow.service.AuthToken.AuthTokenService;
 import una.ac.cr.FitFlow.service.CompletedActivity.CompletedActivityService;
 import una.ac.cr.FitFlow.service.Guide.GuideService;
 import una.ac.cr.FitFlow.service.Habit.HabitService;
@@ -89,8 +88,6 @@ class GraphQlSecurityIntegrationTest {
     @MockBean
     private ProgressLogService progressLogService;
 
-    @MockBean
-    private AuthTokenService authTokenService;
 
     @MockBean
     private UserService userService;

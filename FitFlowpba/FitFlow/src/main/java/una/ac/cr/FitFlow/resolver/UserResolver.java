@@ -20,6 +20,7 @@ import una.ac.cr.FitFlow.dto.Role.RoleOutputDTO;
 import una.ac.cr.FitFlow.dto.User.UserInputDTO;
 import una.ac.cr.FitFlow.dto.User.UserOutputDTO;
 import una.ac.cr.FitFlow.dto.User.UserPageDTO;
+import una.ac.cr.FitFlow.dto.User.LoginTokenDTO;
 import una.ac.cr.FitFlow.model.Role;
 import una.ac.cr.FitFlow.security.SecurityUtils;
 import una.ac.cr.FitFlow.service.Habit.HabitService;
@@ -83,7 +84,7 @@ public class UserResolver {
     }
 
     @MutationMapping(name = "login")
-    public una.ac.cr.FitFlow.dto.AuthToken.LoginTokenDTO login(
+    public LoginTokenDTO login(
             @Argument("email") String email,
             @Argument("password") String password) {
         return userService.loginByMail(email, password);
