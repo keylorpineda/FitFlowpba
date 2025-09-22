@@ -14,20 +14,25 @@ import jakarta.validation.Valid;
 import una.ac.cr.FitFlow.dto.AuthToken.AuthTokenPageDTO;
 import una.ac.cr.FitFlow.dto.AuthToken.AuthTokenInputDTO;
 import una.ac.cr.FitFlow.dto.AuthToken.AuthTokenOutputDTO;
+import una.ac.cr.FitFlow.dto.User.UserOutputDTO;
+import una.ac.cr.FitFlow.model.Role;
+import una.ac.cr.FitFlow.security.SecurityUtils;
 import una.ac.cr.FitFlow.service.AuthToken.AuthTokenService;
 import una.ac.cr.FitFlow.service.user.UserService;
-import una.ac.cr.FitFlow.dto.User.UserOutputDTO;
 
 @RequiredArgsConstructor
 @Controller
 @Validated
 public class AuthTokenResolver {
 
+    private static final Role.Module MODULE = Role.Module.RUTINAS;
+
     private final AuthTokenService authTokenService;
     private final UserService userService;
 
     @QueryMapping(name = "authTokenById")
     public AuthTokenOutputDTO authTokenById(@Argument("tokenId") String tokenId) {
+        SecurityUtils.requireRead(MODULE);
         return authTokenService.findByToken(tokenId);
     }
 
@@ -35,6 +40,7 @@ public class AuthTokenResolver {
     public AuthTokenPageDTO authTokensByUserId(@Argument("userId") Long userId,
                                                @Argument("page") int page,
                                                @Argument("size") int size) {
+        SecurityUtils.requireRead(MODULE);
         Pageable pageable = PageRequest.of(page, size);
         Page<AuthTokenOutputDTO> p = authTokenService.listByUserId(userId, pageable);
         return AuthTokenPageDTO.builder()
@@ -48,11 +54,13 @@ public class AuthTokenResolver {
 
     @MutationMapping(name = "createAuthToken")
     public AuthTokenOutputDTO createAuthToken(@Valid @Argument("input") AuthTokenInputDTO input) {
+        SecurityUtils.requireWrite(MODULE);
         return authTokenService.create(input);
     }
 
     @MutationMapping(name = "deleteAuthToken")
     public Boolean deleteAuthToken(@Argument("tokenId") String tokenId) {
+        SecurityUtils.requireWrite(MODULE);
         if (!authTokenService.isValid(tokenId)) {
             return false;
         }
