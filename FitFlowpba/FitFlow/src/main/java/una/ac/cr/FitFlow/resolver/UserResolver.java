@@ -15,21 +15,23 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import una.ac.cr.FitFlow.dto.Habit.HabitOutputDTO;
+import una.ac.cr.FitFlow.dto.Role.RoleOutputDTO;
 import una.ac.cr.FitFlow.dto.User.UserInputDTO;
 import una.ac.cr.FitFlow.dto.User.UserOutputDTO;
 import una.ac.cr.FitFlow.dto.User.UserPageDTO;
-import una.ac.cr.FitFlow.dto.Role.RoleOutputDTO;
-import una.ac.cr.FitFlow.dto.AuthToken.AuthTokenOutputDTO;
-import una.ac.cr.FitFlow.dto.Habit.HabitOutputDTO;
-
-import una.ac.cr.FitFlow.service.user.UserService;
-import una.ac.cr.FitFlow.service.role.RoleService;
+import una.ac.cr.FitFlow.model.Role;
+import una.ac.cr.FitFlow.security.SecurityUtils;
 import una.ac.cr.FitFlow.service.Habit.HabitService;
+import una.ac.cr.FitFlow.service.role.RoleService;
+import una.ac.cr.FitFlow.service.user.UserService;
 
 @Controller
 @RequiredArgsConstructor
 @Validated
 public class UserResolver {
+
+    private static final Role.Module MODULE = Role.Module.RUTINAS;
 
     private final UserService userService;
     private final RoleService roleService;
@@ -39,6 +41,7 @@ public class UserResolver {
 
     @QueryMapping(name = "userById")
     public UserOutputDTO userById(@Argument("id") Long id) {
+        SecurityUtils.requireRead(MODULE);
         return userService.findUserById(id);
     }
 
@@ -46,6 +49,7 @@ public class UserResolver {
     public UserPageDTO users(@Argument("page") int page,
                              @Argument("size") int size,
                              @Argument("keyword") String keyword) {
+        SecurityUtils.requireRead(MODULE);
         Pageable pageable = PageRequest.of(page, size);
         Page<UserOutputDTO> userPage = userService.listUsers(keyword, pageable);
         return UserPageDTO.builder()
@@ -67,21 +71,23 @@ public class UserResolver {
     @MutationMapping(name = "updateUser")
     public UserOutputDTO updateUser(@Argument("id") Long id,
                                     @Argument("input") UserInputDTO userDto) {
+        SecurityUtils.requireWrite(MODULE);
         return userService.updateUser(id, userDto);
     }
 
     @MutationMapping(name = "deleteUser")
     public Boolean deleteUser(@Argument("id") Long id) {
+        SecurityUtils.requireWrite(MODULE);
         userService.deleteUser(id);
         return true;
     }
 
     @MutationMapping(name = "login")
-public una.ac.cr.FitFlow.dto.AuthToken.LoginTokenDTO login(
-        @Argument("email") String email,
-        @Argument("password") String password) {
-    return userService.loginByMail(email, password);
-}
+    public una.ac.cr.FitFlow.dto.AuthToken.LoginTokenDTO login(
+            @Argument("email") String email,
+            @Argument("password") String password) {
+        return userService.loginByMail(email, password);
+    }
 
 
     // ===== Field Resolvers =====

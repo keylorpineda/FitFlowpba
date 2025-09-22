@@ -11,12 +11,14 @@ import org.springframework.data.domain.Pageable;
 
 import jakarta.validation.Valid;
 
-import una.ac.cr.FitFlow.dto.CompletedActivity.CompletedActivityPageDTO;
 import una.ac.cr.FitFlow.dto.CompletedActivity.CompletedActivityInputDTO;
 import una.ac.cr.FitFlow.dto.CompletedActivity.CompletedActivityOutputDTO;
+import una.ac.cr.FitFlow.dto.CompletedActivity.CompletedActivityPageDTO;
 import una.ac.cr.FitFlow.dto.Habit.HabitOutputDTO;
-import una.ac.cr.FitFlow.dto.User.UserOutputDTO;
 import una.ac.cr.FitFlow.dto.ProgressLog.ProgressLogOutputDTO;
+import una.ac.cr.FitFlow.dto.User.UserOutputDTO;
+import una.ac.cr.FitFlow.model.Role;
+import una.ac.cr.FitFlow.security.SecurityUtils;
 import una.ac.cr.FitFlow.service.CompletedActivity.CompletedActivityService;
 import una.ac.cr.FitFlow.service.Habit.HabitService;
 import una.ac.cr.FitFlow.service.ProgressLog.ProgressLogService;
@@ -27,6 +29,8 @@ import una.ac.cr.FitFlow.service.user.UserService;
 @Validated
 public class CompletedActivityResolver {
 
+    private static final Role.Module MODULE = Role.Module.PROGRESO;
+
     private final CompletedActivityService completedActivityService;
     private final HabitService habitService;
     private final ProgressLogService progressLogService;
@@ -34,6 +38,7 @@ public class CompletedActivityResolver {
 
     @QueryMapping(name = "completedActivityById")
     public CompletedActivityOutputDTO completedActivityById(@Argument("id") Long id) {
+        SecurityUtils.requireRead(MODULE);
         return completedActivityService.findCompletedActivityById(id);
     }
 
@@ -41,6 +46,7 @@ public class CompletedActivityResolver {
     public CompletedActivityPageDTO completedActivities(@Argument("page") int page,
                                                         @Argument("size") int size,
                                                         @Argument("keyword") String keyword) {
+        SecurityUtils.requireRead(MODULE);
         Pageable pageable = PageRequest.of(page, size);
         Page<CompletedActivityOutputDTO> p = completedActivityService.listCompletedActivities(keyword, pageable);
         return CompletedActivityPageDTO.builder()
@@ -56,6 +62,7 @@ public class CompletedActivityResolver {
     public CompletedActivityPageDTO completedActivitiesByUserId(@Argument("page") int page,
                                                                 @Argument("size") int size,
                                                                 @Argument("userId") Long userId) {
+        SecurityUtils.requireRead(MODULE);
         Pageable pageable = PageRequest.of(page, size);
         Page<CompletedActivityOutputDTO> p = completedActivityService.findCompletedActivitiesByUserId(userId, pageable);
         return CompletedActivityPageDTO.builder()
@@ -71,6 +78,7 @@ public class CompletedActivityResolver {
     public CompletedActivityPageDTO completedActivitiesByProgressLogId(@Argument("page") int page,
                                                                        @Argument("size") int size,
                                                                        @Argument("progressLogId") Long progressLogId) {
+        SecurityUtils.requireRead(MODULE);
         Pageable pageable = PageRequest.of(page, size);
         Page<CompletedActivityOutputDTO> p = completedActivityService.findByProgressLogId(progressLogId, pageable);
         return CompletedActivityPageDTO.builder()
@@ -84,17 +92,20 @@ public class CompletedActivityResolver {
 
     @MutationMapping(name = "createCompletedActivity")
     public CompletedActivityOutputDTO createCompletedActivity(@Valid @Argument("input") CompletedActivityInputDTO input) {
+        SecurityUtils.requireWrite(MODULE);
         return completedActivityService.createCompletedActivity(input);
     }
 
     @MutationMapping(name = "updateCompletedActivity")
     public CompletedActivityOutputDTO updateCompletedActivity(@Argument("id") Long id,
                                                               @Argument("input") CompletedActivityInputDTO input) {
+        SecurityUtils.requireWrite(MODULE);
         return completedActivityService.updateCompletedActivity(id, input);
     }
 
     @MutationMapping(name = "deleteCompletedActivity")
     public Boolean deleteCompletedActivity(@Argument("id") Long id) {
+        SecurityUtils.requireWrite(MODULE);
         completedActivityService.deleteCompletedActivity(id);
         return true;
     }

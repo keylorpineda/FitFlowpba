@@ -13,17 +13,20 @@ import java.util.stream.Collectors;
 
 import una.ac.cr.FitFlow.dto.Routine.RoutineInputDTO;
 import una.ac.cr.FitFlow.dto.Routine.RoutineOutputDTO;
+import una.ac.cr.FitFlow.dto.Routine.RoutinePageDTO;
 import una.ac.cr.FitFlow.dto.RoutineActivity.RoutineActivityOutputDTO;
 import una.ac.cr.FitFlow.dto.User.UserOutputDTO;
-import una.ac.cr.FitFlow.dto.Routine.RoutinePageDTO;
-
+import una.ac.cr.FitFlow.model.Role;
+import una.ac.cr.FitFlow.security.SecurityUtils;
 import una.ac.cr.FitFlow.service.Routine.RoutineService;
-import una.ac.cr.FitFlow.service.user.UserService;
 import una.ac.cr.FitFlow.service.RoutineActivity.RoutineActivityService;
+import una.ac.cr.FitFlow.service.user.UserService;
 
 @Controller
 @RequiredArgsConstructor
 public class RoutineResolver {
+
+    private static final Role.Module MODULE = Role.Module.RUTINAS;
 
     private final RoutineService routineService;
     private final UserService userService;
@@ -33,6 +36,7 @@ public class RoutineResolver {
 
     @QueryMapping(name = "routineById")
     public RoutineOutputDTO routineById(@Argument("id") Long id) {
+        SecurityUtils.requireRead(MODULE);
         return routineService.findById(id);
     }
 
@@ -40,6 +44,7 @@ public class RoutineResolver {
     public RoutinePageDTO routines(@Argument("page") int page,
                                    @Argument("size") int size,
                                    @Argument("keyword") String keyword) {
+        SecurityUtils.requireRead(MODULE);
         Pageable pageable = PageRequest.of(page, size);
         Page<RoutineOutputDTO> p = routineService.list(keyword, pageable);
         return RoutinePageDTO.builder()
@@ -55,6 +60,7 @@ public class RoutineResolver {
     public RoutinePageDTO routinesByUserId(@Argument("userId") Long userId,
                                            @Argument("page") int page,
                                            @Argument("size") int size) {
+        SecurityUtils.requireRead(MODULE);
         Pageable pageable = PageRequest.of(page, size);
         Page<RoutineOutputDTO> p = routineService.listByUserId(userId, pageable);
         return RoutinePageDTO.builder()
@@ -69,17 +75,20 @@ public class RoutineResolver {
 
     @MutationMapping(name = "createRoutine")
     public RoutineOutputDTO createRoutine(@Argument("input") RoutineInputDTO input) {
+        SecurityUtils.requireWrite(MODULE);
         return routineService.create(input);
     }
 
     @MutationMapping(name = "updateRoutine")
     public RoutineOutputDTO updateRoutine(@Argument("id") Long id,
                                           @Argument("input") RoutineInputDTO input) {
+        SecurityUtils.requireWrite(MODULE);
         return routineService.update(id, input);
     }
 
     @MutationMapping(name = "deleteRoutine")
     public Boolean deleteRoutine(@Argument("id") Long id) {
+        SecurityUtils.requireWrite(MODULE);
         routineService.delete(id);
         return true;
     }
